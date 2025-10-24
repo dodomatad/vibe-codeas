@@ -1,0 +1,135 @@
+// prisma/schema.prisma
+/**
+ * Vibe Code Database Schema
+ * 
+ * Resumo:
+ * PostgreSQL com Prisma ORM para cost tracking, user management e sessions
+ * Redis (via Upstash) para rate limiting e caching
+ * 
+ * MVP: Basic schema com cost tracking + user management
+ * Enterprise: Replication, pooling, backup automation
+ */
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================================
+// COST TRACKING
+// ============================================================================
+
+model CostRecord {
+  id            String   @id @default(cuid())
+  userId        String
+  sessionId     String?
+  model         String   // 'claude-sonnet-4' | 'gpt-5' | etc
+  inputTokens   Int
+  outputTokens  Int
+  cost          Float
+  task          String   // 'code-generation' | 'refactoring' | etc
+  metadata      Json?    // { requestId, cached, reasoning }
+  createdAt     DateTime @default(now())
+  
+  user          User?    @relation("UserCosts", fields: [userId], references: [id])
+  
+  @@index([userId, createdAt])
+  @@index([sessionId])
+  @@index([model, createdAt])
+}
+
+// ============================================================================
+// USER MANAGEMENT
+// ============================================================================
+
+model User {
+  id            String       @id @default(cuid())
+  email         String       @unique
+  name          String?
+  apiKeys       ApiKey[]
+  sessions      Session[]
+  costRecords   CostRecord[] @relation("UserCosts")
+  agentLogs     AgentLog[]   @relation("UserAgentLogs")
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  
+  @@index([email])
+}
+
+// ============================================================================
+// API KEY MANAGEMENT (Encrypted)
+// ============================================================================
+
+model ApiKey {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider      String   // 'anthropic' | 'openai' | 'google' | 'deepseek'
+  keyHash       String   // SHA-256 hash (NUNCA armazenar raw keys)
+  isValid       Boolean  @default(true)
+  lastValidated DateTime?
+  lastUsed      DateTime?
+  createdAt     DateTime @default(now())
+  
+  @@index([userId])
+  @@index([provider, isValid])
+}
+
+// ============================================================================
+// SESSION MANAGEMENT
+// ============================================================================
+
+model Session {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  csrfToken     String   @unique
+  expiresAt     DateTime
+  createdAt     DateTime @default(now())
+  
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+// ============================================================================
+// BACKGROUND AGENT LOGS
+// ============================================================================
+
+model AgentLog {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation("UserAgentLogs", fields: [userId], references: [id])
+  agentType     String   // 'bugbot' | 'testgen' | 'docbot' | etc
+  taskId        String
+  status        String   // 'running' | 'completed' | 'failed'
+  result        Json?    // Results do agent
+  error         String?
+  duration      Int?     // milliseconds
+  createdAt     DateTime @default(now())
+  
+  @@index([userId, agentType])
+  @@index([status, createdAt])
+  @@index([taskId])
+}
+
+// ============================================================================
+// AUDIT LOG (Security)
+// ============================================================================
+
+model AuditLog {
+  id            String   @id @default(cuid())
+  userId        String?
+  action        String   // 'cost_tracked' | 'api_key_validated' | etc
+  resource      String?  // Resource ID affected
+  metadata      Json?    // Additional context
+  ipAddress     String?
+  userAgent     String?
+  createdAt     DateTime @default(now())
+  
+  @@index([userId, createdAt])
+  @@index([action, createdAt])
+}

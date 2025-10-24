@@ -1,0 +1,41 @@
+{
+  "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
+  "_comment": "Mutation Testing Configuration - Target: 80%+ mutation score",
+  "mutator": "typescript",
+  "packageManager": "pnpm",
+  "reporters": ["html", "clear-text", "progress", "dashboard"],
+  "testRunner": "vitest",
+  "coverageAnalysis": "perTest",
+  "mutate": [
+    "lib/**/*.ts",
+    "!lib/**/*.test.ts",
+    "!lib/**/*.d.ts",
+    "!lib/**/*.spec.ts",
+    "!lib/**/*.config.ts"
+  ],
+  "thresholds": {
+    "high": 80,
+    "low": 70,
+    "break": 60
+  },
+  "timeoutMS": 60000,
+  "maxConcurrentTestRunners": 4,
+  "concurrency": 4,
+  "dashboard": {
+    "project": "vibe-code",
+    "version": "main",
+    "module": "vibe-code-v2"
+  },
+  "plugins": [
+    "@stryker-mutator/typescript-checker"
+  ],
+  "checkers": ["typescript"],
+  "tsconfigFile": "tsconfig.json",
+  "ignorePatterns": [
+    "node_modules",
+    "dist",
+    ".next",
+    "coverage",
+    "tests"
+  ]
+}
