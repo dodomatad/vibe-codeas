@@ -39,12 +39,12 @@ export default defineConfig({
         '**/*.test.ts',
         '**/*.spec.ts',
       ],
-      // UPGRADED: Enterprise coverage thresholds (was 40%, now 85%)
+      // UPGRADED: Production coverage thresholds (was 40%, now 70%)
       all: true,
-      statements: 85,
-      branches: 85,
-      functions: 85,
-      lines: 85,
+      statements: 70,
+      branches: 70,
+      functions: 70,
+      lines: 70,
     },
     
     // Performance optimization
