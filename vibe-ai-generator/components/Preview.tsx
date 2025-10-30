@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useMemo } from "react";
 
 interface PreviewProps {
   code: string;
@@ -8,24 +8,13 @@ interface PreviewProps {
 }
 
 export default function Preview({ code, language }: PreviewProps) {
-  const iframeRef = useRef<HTMLIFrameElement>(null);
-
-  useEffect(() => {
-    if (!iframeRef.current) return;
-
-    const iframe = iframeRef.current;
-    const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
-
-    if (!iframeDoc) return;
-
+  const htmlContent = useMemo(() => {
     if (language === "html") {
       // Para HTML, renderizar diretamente
-      iframeDoc.open();
-      iframeDoc.write(code);
-      iframeDoc.close();
+      return code;
     } else if (language === "typescript" || language === "javascript") {
       // Para React/JSX, criar um wrapper HTML
-      const htmlContent = `
+      return `
 <!DOCTYPE html>
 <html>
 <head>
@@ -46,20 +35,22 @@ export default function Preview({ code, language }: PreviewProps) {
 <body>
   <div id="root"></div>
   <script type="text/babel">
-    ${code}
+    try {
+      ${code}
 
-    // Se tiver um componente default exportado, renderizar
-    if (typeof App !== 'undefined') {
-      ReactDOM.render(<App />, document.getElementById('root'));
+      // Se tiver um componente default exportado, renderizar
+      if (typeof App !== 'undefined') {
+        ReactDOM.render(<App />, document.getElementById('root'));
+      }
+    } catch (error) {
+      document.body.innerHTML = '<div style="padding: 20px; color: red;">Erro no código: ' + error.message + '</div>';
     }
   </script>
 </body>
 </html>
       `;
-      iframeDoc.open();
-      iframeDoc.write(htmlContent);
-      iframeDoc.close();
     }
+    return "";
   }, [code, language]);
 
   return (
@@ -71,7 +62,7 @@ export default function Preview({ code, language }: PreviewProps) {
       </div>
       <div className="bg-white">
         <iframe
-          ref={iframeRef}
+          srcDoc={htmlContent}
           className="w-full h-[400px] border-0"
           sandbox="allow-scripts"
           title="Code Preview"
