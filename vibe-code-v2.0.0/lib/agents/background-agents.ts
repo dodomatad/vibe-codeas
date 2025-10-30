@@ -1,17 +1,20 @@
 /**
  * BACKGROUND AGENTS SYSTEM - Vibe Code Ultimate
- * 
+ *
+ * ⚠️ EXPERIMENTAL FEATURE - Em desenvolvimento
+ * Para habilitar, configure ENABLE_BACKGROUND_AGENTS=true no .env
+ *
  * Inspirado em Cursor 1.0 e GitHub Copilot Agent Mode
  * Agents rodam em background executando tarefas sem prompting constante
- * 
- * FEATURES:
- * ✅ BugBot - Detecta e previne bugs antes de deployment
- * ✅ TestGen - Gera testes automaticamente
- * ✅ DocBot - Atualiza documentação
- * ✅ RefactorAgent - Identifica code smells
- * ✅ SecurityAgent - Detecta vulnerabilidades
- * ✅ PerformanceAgent - Otimiza código
- * ✅ Memory System - Lembra detalhes de chats passados
+ *
+ * FEATURES (em implementação):
+ * 🚧 BugBot - Detecta e previne bugs antes de deployment
+ * 🚧 TestGen - Gera testes automaticamente
+ * 🚧 DocBot - Atualiza documentação
+ * 🚧 RefactorAgent - Identifica code smells
+ * 🚧 SecurityAgent - Detecta vulnerabilidades
+ * 🚧 PerformanceAgent - Otimiza código
+ * 🚧 Memory System - Lembra detalhes de chats passados
  */
 
 export type AgentType = 
