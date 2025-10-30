@@ -8,7 +8,7 @@ export default function Home() {
   const [prompt, setPrompt] = useState("");
   const [generatedCode, setGeneratedCode] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
-  const [model, setModel] = useState("llama-3.3-70b-versatile");
+  const [model, setModel] = useState("gpt-4o-mini");
   const [language, setLanguage] = useState("typescript");
 
   const handleGenerate = async () => {
@@ -54,9 +54,10 @@ export default function Home() {
                 onChange={(e) => setModel(e.target.value)}
                 className="px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 focus:border-blue-500 focus:outline-none"
               >
-                <option value="llama-3.3-70b-versatile">Groq - Llama 3.3 70B</option>
-                <option value="llama-3.1-70b-versatile">Groq - Llama 3.1 70B</option>
-                <option value="mixtral-8x7b-32768">Groq - Mixtral 8x7B</option>
+                <option value="gpt-4o-mini">GPT-4o Mini (Rápido)</option>
+                <option value="gpt-4o">GPT-4o (Melhor)</option>
+                <option value="gpt-4-turbo">GPT-4 Turbo</option>
+                <option value="gpt-3.5-turbo">GPT-3.5 Turbo (Barato)</option>
               </select>
               <select
                 value={language}

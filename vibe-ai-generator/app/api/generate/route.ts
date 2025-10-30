@@ -1,9 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import Groq from "groq-sdk";
-
-const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY,
-});
+import OpenAI from "openai";
 
 export async function POST(req: NextRequest) {
   try {
@@ -16,12 +12,17 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (!process.env.GROQ_API_KEY) {
+    if (!process.env.OPENAI_API_KEY) {
       return NextResponse.json(
-        { error: "GROQ_API_KEY não configurada. Adicione no arquivo .env" },
+        { error: "OPENAI_API_KEY não configurada. Adicione no arquivo .env" },
         { status: 500 }
       );
     }
+
+    // Inicializar OpenAI
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
 
     // System prompt baseado na linguagem
     const systemPrompts: Record<string, string> = {
@@ -33,8 +34,8 @@ export async function POST(req: NextRequest) {
 
     const systemPrompt = systemPrompts[language] || systemPrompts.typescript;
 
-    // Chamar Groq API
-    const completion = await groq.chat.completions.create({
+    // Chamar OpenAI API
+    const completion = await openai.chat.completions.create({
       messages: [
         {
           role: "system",
@@ -45,7 +46,7 @@ export async function POST(req: NextRequest) {
           content: prompt,
         },
       ],
-      model: model || "llama-3.3-70b-versatile",
+      model: model || "gpt-4o-mini",
       temperature: 0.7,
       max_tokens: 4000,
     });
