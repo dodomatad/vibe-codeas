@@ -4,6 +4,7 @@ import { parseMorphEdits, applyMorphEditToFile } from '@/lib/morph-fast-apply';
 import type { SandboxState } from '@/types/sandbox';
 import type { ConversationState } from '@/types/conversation';
 import { sandboxManager } from '@/lib/sandbox/sandbox-manager';
+import { CodeValidator } from '@/lib/validation/code-validator';
 
 declare global {
   var conversationState: ConversationState | null;
@@ -613,8 +614,43 @@ export async function POST(request: NextRequest) {
 
             const isUpdate = global.existingFiles.has(normalizedPath);
 
+            // Validate and auto-fix code before applying
+            await sendProgress({
+              type: 'validation-progress',
+              fileName: normalizedPath,
+              message: 'Validating code...'
+            });
+
+            const validationResult = await CodeValidator.validate(file.content, normalizedPath);
+
+            if (!validationResult.valid) {
+              await sendProgress({
+                type: 'validation-issues',
+                fileName: normalizedPath,
+                errors: validationResult.errors.length,
+                warnings: validationResult.warnings.length,
+                autoFixed: validationResult.fixed
+              });
+
+              if (validationResult.fixed && validationResult.fixedCode) {
+                await sendProgress({
+                  type: 'validation-autofix',
+                  fileName: normalizedPath,
+                  message: `Auto-fixed ${validationResult.metrics.autoFixesApplied} issues`
+                });
+              }
+            } else {
+              await sendProgress({
+                type: 'validation-success',
+                fileName: normalizedPath,
+                message: 'Code validated successfully'
+              });
+            }
+
             // Remove any CSS imports from JSX/JS files (we're using Tailwind)
-            let fileContent = file.content;
+            let fileContent = validationResult.fixed && validationResult.fixedCode
+              ? validationResult.fixedCode
+              : file.content;
             if (file.path.endsWith('.jsx') || file.path.endsWith('.js') || file.path.endsWith('.tsx') || file.path.endsWith('.ts')) {
               fileContent = fileContent.replace(/import\s+['"]\.\/[^'"]+\.css['"];?\s*\n?/g, '');
             }

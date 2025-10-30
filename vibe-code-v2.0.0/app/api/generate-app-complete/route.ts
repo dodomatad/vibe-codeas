@@ -14,6 +14,7 @@
  */
 
 import { NextRequest } from 'next/server';
+import { PromptEnhancer } from '@/lib/ai/prompt-engineering/prompt-enhancer';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -91,6 +92,27 @@ export async function POST(request: NextRequest) {
             data: { sandboxId, sandboxUrl },
           });
 
+          // STEP 1.5: Analyze and enhance prompt with intelligent reasoning
+          sendProgress({
+            step: 'reasoning',
+            progress: 25,
+            message: '🧠 Analyzing requirements and enhancing prompt...',
+          });
+
+          const enhancedPromptData = PromptEnhancer.enhance(prompt);
+
+          sendProgress({
+            step: 'reasoning',
+            progress: 28,
+            message: '✅ Requirements analyzed!',
+            data: {
+              detectedType: enhancedPromptData.reasoning[0],
+              complexity: enhancedPromptData.reasoning[1],
+              requirements: enhancedPromptData.detectedPatterns,
+              addedContext: enhancedPromptData.addedContext,
+            },
+          });
+
           // STEP 2: Generate Code with AI
           sendProgress({
             step: 'generate',
@@ -99,30 +121,8 @@ export async function POST(request: NextRequest) {
             data: { model },
           });
 
-          // Enhanced prompt for complete app generation
-          const enhancedPrompt = `
-You are an expert full-stack developer. Generate a COMPLETE, PRODUCTION-READY application based on this request:
-
-${prompt}
-
-Requirements:
-1. Create ALL necessary files (components, styles, utilities, etc.)
-2. Use ${framework === 'auto' ? 'React with Vite' : framework}
-3. Include proper TypeScript types
-4. Add comprehensive error handling
-5. Make it visually appealing with modern design
-6. Include responsive design
-7. Add comments for clarity
-8. Follow best practices
-
-Generate the complete file structure with all code. Use this format:
-
-\`\`\`filename:path/to/file.tsx
-// code here
-\`\`\`
-
-Start generating now!
-          `.trim();
+          // Use intelligently enhanced prompt
+          const enhancedPrompt = enhancedPromptData.enhanced;
 
           const generateResponse = await fetch('http://localhost:3000/api/generate-ai-code-stream', {
             method: 'POST',
