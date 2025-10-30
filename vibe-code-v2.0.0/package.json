@@ -116,7 +116,7 @@
     "langchain": "^0.2.20",
     "@langchain/openai": "^0.2.11",
     "@langchain/anthropic": "^0.2.18",
-    "@langchain/community": "^0.2.33",
+    "@langchain/community": "^0.3.18",
     "unified": "^11.0.5",
     "remark": "^15.0.1",
     "remark-parse": "^11.0.0",
