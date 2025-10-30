@@ -1,0 +1,148 @@
+# Vibe Code - Docker Compose Configuration
+# For local development and production deployment
+
+version: '3.8'
+
+services:
+  # Main application
+  vibe-code:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - NODE_ENV=production
+    container_name: vibe-code-app
+    image: vibe-code:latest
+    restart: unless-stopped
+
+    ports:
+      - "3000:3000"
+
+    environment:
+      # Node Environment
+      - NODE_ENV=production
+      - PORT=3000
+      - HOSTNAME=0.0.0.0
+
+      # AI Model API Keys (Set these in .env file)
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+
+      # Feature Flags
+      - ENABLE_BACKGROUND_AGENTS=${ENABLE_BACKGROUND_AGENTS:-false}
+      - ENABLE_RAG_SYSTEM=${ENABLE_RAG_SYSTEM:-false}
+      - ENABLE_AUTOFIX=${ENABLE_AUTOFIX:-true}
+
+      # Model Configuration
+      - DEFAULT_MODEL=${DEFAULT_MODEL:-claude-sonnet-4}
+      - FALLBACK_MODEL=${FALLBACK_MODEL:-gpt-4}
+
+      # Sandbox Configuration (E2B)
+      - E2B_API_KEY=${E2B_API_KEY}
+      - E2B_TEMPLATE_ID=${E2B_TEMPLATE_ID:-}
+
+      # Performance
+      - MAX_CONCURRENT_GENERATIONS=${MAX_CONCURRENT_GENERATIONS:-5}
+      - CACHE_TTL=${CACHE_TTL:-300000}
+
+      # Telemetry
+      - NEXT_TELEMETRY_DISABLED=1
+
+    env_file:
+      - .env
+
+    volumes:
+      # Persist cache data
+      - cache-data:/app/.cache
+      # Persist logs
+      - logs:/app/logs
+
+    networks:
+      - vibe-network
+
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+    labels:
+      - "com.vibe-code.description=Vibe Code Main Application"
+      - "com.vibe-code.version=2.1.0"
+
+  # Redis (optional - for distributed caching in production)
+  redis:
+    image: redis:7-alpine
+    container_name: vibe-code-redis
+    restart: unless-stopped
+
+    ports:
+      - "6379:6379"
+
+    volumes:
+      - redis-data:/data
+
+    networks:
+      - vibe-network
+
+    command: redis-server --appendonly yes
+
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+    profiles:
+      - production
+
+    labels:
+      - "com.vibe-code.description=Redis Cache Server"
+
+  # Nginx (optional - reverse proxy for production)
+  nginx:
+    image: nginx:alpine
+    container_name: vibe-code-nginx
+    restart: unless-stopped
+
+    ports:
+      - "80:80"
+      - "443:443"
+
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+      - nginx-logs:/var/log/nginx
+
+    depends_on:
+      - vibe-code
+
+    networks:
+      - vibe-network
+
+    profiles:
+      - production
+
+    labels:
+      - "com.vibe-code.description=Nginx Reverse Proxy"
+
+# Named volumes for data persistence
+volumes:
+  cache-data:
+    driver: local
+  logs:
+    driver: local
+  redis-data:
+    driver: local
+  nginx-logs:
+    driver: local
+
+# Network configuration
+networks:
+  vibe-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

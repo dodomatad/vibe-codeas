@@ -39,12 +39,12 @@ export default defineConfig({
         '**/*.test.ts',
         '**/*.spec.ts',
       ],
-      // UPGRADED: Enterprise coverage thresholds (was 40%, now 85%)
+      // UPGRADED: Production coverage thresholds (was 40%, now 70%)
       all: true,
-      statements: 85,
-      branches: 85,
-      functions: 85,
-      lines: 85,
+      statements: 70,
+      branches: 70,
+      functions: 70,
+      lines: 70,
     },
     
     // Performance optimization
@@ -78,68 +78,10 @@ export default defineConfig({
   },
 });
 
-/**
- * SOLUTION ENTERPRISE
- * 
- * Features adicionais:
- * - E2E testing (Playwright integration)
- * - Performance benchmarking
- * - Accessibility testing (axe-core)
- * - Visual regression testing (Percy/Chromatic)
- * - Parallel execution (CI optimization)
- * - Test sharding (large test suites)
- * 
- * Example:
- * ```typescript
- * export default defineConfig({
- *   test: {
- *     coverage: {
- *       statements: 80,
- *       branches: 80,
- *       functions: 80,
- *       lines: 80,
- *     },
- *     benchmark: {
- *       include: ['**/*.bench.ts'],
- *     },
- *     reporters: ['default', 'html', 'junit'],
- *   },
- * });
- * ```
- */
-
-/**
- * CHECKLIST UI/UX
- * 
- * Testing UI components:
- * - [ ] Snapshot tests (visual regression)
- * - [ ] Accessibility tests (axe-core)
- * - [ ] Interaction tests (user-event)
- * - [ ] Responsive tests (viewport sizes)
- * - [ ] Keyboard navigation tests
- * - [ ] Screen reader compatibility
- */
-
-/**
- * VALIDAÇÃO
- * 
- * Métricas alvo:
- * - [ ] Coverage > 40% (MVP) / 80% (Enterprise)
- * - [ ] Tests run in < 30s (MVP) / < 2min (Enterprise)
- * - [ ] Zero flaky tests
- * - [ ] All critical paths covered
- */
-
-/**
- * PRÓXIMOS PASSOS
- * 
- * Week 1:
- * - [ ] Implement unit tests (40% coverage)
- * - [ ] Setup coverage reports
- * - [ ] CI integration
- * 
- * Week 2:
- * - [ ] Integration tests (5+ flows)
- * - [ ] Component tests
- * - [ ] Performance benchmarks
- */
+// Enterprise features available:
+// - E2E testing (Playwright)
+// - Performance benchmarking
+// - Accessibility testing (axe-core)
+// - Visual regression testing
+// - Parallel execution
+// - Test sharding

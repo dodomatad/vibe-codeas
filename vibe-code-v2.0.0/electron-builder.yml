@@ -1,0 +1,114 @@
+# electron-builder.yml
+# Configuration for building Vibe Code Desktop installers
+
+appId: com.vibecode.desktop
+productName: Vibe Code
+copyright: Copyright © 2025 Vibe Code Team
+
+# Directories
+directories:
+  buildResources: electron/assets
+  output: dist
+
+# Files to include
+files:
+  - out/**/*
+  - electron/**/*
+  - package.json
+  - node_modules/**/*
+
+# macOS configuration
+mac:
+  target:
+    - dmg
+    - zip
+  category: public.app-category.developer-tools
+  icon: electron/assets/icon.icns
+  hardenedRuntime: true
+  gatekeeperAssess: false
+  entitlements: electron/entitlements.mac.plist
+  entitlementsInherit: electron/entitlements.mac.plist
+  darkModeSupport: true
+
+# macOS DMG configuration
+dmg:
+  contents:
+    - x: 130
+      y: 220
+    - x: 410
+      y: 220
+      type: link
+      path: /Applications
+  window:
+    width: 540
+    height: 380
+
+# Windows configuration
+win:
+  target:
+    - nsis
+    - portable
+  icon: electron/assets/icon.ico
+  publisherName: Vibe Code Team
+
+# Windows NSIS installer
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: always
+  createStartMenuShortcut: true
+  shortcutName: Vibe Code
+  installerIcon: electron/assets/icon.ico
+  uninstallerIcon: electron/assets/icon.ico
+  installerHeader: electron/assets/installer-header.bmp
+  installerSidebar: electron/assets/installer-sidebar.bmp
+  license: LICENSE
+  runAfterFinish: true
+  artifactName: ${productName}-Setup-${version}.${ext}
+
+# Windows portable
+portable:
+  artifactName: ${productName}-Portable-${version}.${ext}
+
+# Linux configuration
+linux:
+  target:
+    - AppImage
+    - deb
+    - rpm
+  category: Development
+  icon: electron/assets/icon.png
+  desktop:
+    Name: Vibe Code
+    Comment: AI-Powered Code Generation
+    Categories: Development;IDE;
+    StartupWMClass: vibe-code
+
+# AppImage configuration
+appImage:
+  license: LICENSE
+  category: Development
+
+# Debian package configuration
+deb:
+  depends:
+    - gconf2
+    - gconf-service
+    - libnotify4
+    - libappindicator1
+    - libxtst6
+    - libnss3
+
+# Auto-updater (GitHub releases)
+publish:
+  provider: github
+  owner: your-username
+  repo: vibe-code
+  releaseType: release
+
+# Compression
+compression: maximum
+
+# Build configuration
+buildVersion: 2.1.1
+electronVersion: 28.1.0

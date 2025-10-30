@@ -22,6 +22,7 @@ yarn-debug.log*
 yarn-error.log*
 
 # Local env files
+.env
 .env*.local
 
 # IDE
@@ -38,3 +39,6 @@ Thumbs.db
 # Misc
 *.log
 .cache/
+
+# TypeScript
+*.tsbuildinfo
