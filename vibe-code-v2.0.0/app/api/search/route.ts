@@ -3,9 +3,17 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function POST(req: NextRequest) {
   try {
     const { query } = await req.json();
-    
+
     if (!query) {
       return NextResponse.json({ error: 'Query is required' }, { status: 400 });
+    }
+
+    // Check if Firecrawl API key is configured
+    if (!process.env.FIRECRAWL_API_KEY) {
+      return NextResponse.json({
+        results: [],
+        message: 'Search is disabled. Add FIRECRAWL_API_KEY to .env to enable web search.'
+      });
     }
 
     // Use Firecrawl search to get top 10 results with screenshots
@@ -30,7 +38,7 @@ export async function POST(req: NextRequest) {
     }
 
     const searchData = await searchResponse.json();
-    
+
     // Format results with screenshots and markdown
     const results = searchData.data?.map((result: any) => ({
       url: result.url,
@@ -44,7 +52,7 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error('Search error:', error);
     return NextResponse.json(
-      { error: 'Failed to perform search' },
+      { error: 'Failed to perform search', results: [] },
       { status: 500 }
     );
   }
